@@ -6,7 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.example.springbootvaadin.model.Todo;
 import com.example.springbootvaadin.repo.TodoRepository;
+import com.example.springbootvaadin.serverpush.Broadcaster;
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -15,14 +18,15 @@ import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.shared.ThemeVariant;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.shared.Registration;
 
 @Route("todos/:user")
 public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDynamicTitle{
@@ -38,7 +42,9 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 	
 	private String user; 
 	
-	Grid<Todo> grid;
+	private Grid<Todo> grid;
+	
+	private Registration broadcastRegisteration;
 	
 	
 	@Override
@@ -48,6 +54,15 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 		createTodoButtons();
 		createTodosGrid();
 		createGridItemsSelectionControls();
+		
+		final UI ui = attachEvent.getUI();
+		broadcastRegisteration = Broadcaster.register(message -> {
+			ui.access(() -> {
+				refreshTodos();
+				Notification.show(message);
+			});
+		});
+		
 		
 	}
 
@@ -91,7 +106,7 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 		deleteButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_ERROR);
 		deleteButton.addClickListener(event -> {
 			todoRepository.remove(grid.getSelectedItems());
-			refreshTodos();
+			Broadcaster.broadcast("items deleted by : " + user);
 		});
 		
 		buttonsLayout.add(addTodoButton, deleteButton);
@@ -117,7 +132,7 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 			todo.setDone(false);
 			todoRepository.addTodo(todo);
 			dialog.close();
-			refreshTodos();
+			Broadcaster.broadcast("new Items added by : " + user);
 		});
 		
 		Button cancelButton = new Button("Cancel");
@@ -175,6 +190,12 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 	@Override
 	public String getPageTitle() {
 		return "Todos : " + user;
+	}
+	
+	@Override
+	protected void onDetach(DetachEvent detachEvent) {
+		this.broadcastRegisteration.remove();
+		this.broadcastRegisteration = null;
 	}
 	
 }
