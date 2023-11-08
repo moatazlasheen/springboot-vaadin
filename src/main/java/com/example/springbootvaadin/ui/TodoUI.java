@@ -56,12 +56,12 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 		createGridItemsSelectionControls();
 		
 		final UI ui = attachEvent.getUI();
-		broadcastRegisteration = Broadcaster.register(message -> {
+		broadcastRegisteration = Broadcaster.register(message -> 
 			ui.access(() -> {
 				refreshTodos();
 				Notification.show(message);
-			});
-		});
+			})
+		);
 		
 		
 	}
@@ -72,16 +72,12 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 		final Button selectAllButton = new Button("Select All");
 		selectAllButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 		selectAllButton.setIcon(VaadinIcon.PLUS.create());
-		selectAllButton.addClickListener(event-> {
-			grid.asMultiSelect().select(todoRepository.getAllTodos());
-		});
+		selectAllButton.addClickListener(event-> grid.asMultiSelect().select(todoRepository.getAllTodos()));
 		
 		final Button deSelectAllButton = new Button("Deselect All");
 		deSelectAllButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 		deSelectAllButton.setIcon(VaadinIcon.MINUS.create());
-		deSelectAllButton.addClickListener(event-> {
-			grid.asMultiSelect().deselectAll();
-		});
+		deSelectAllButton.addClickListener(event-> grid.asMultiSelect().deselectAll());
 		
 		horizontalLayout.add(selectAllButton, deSelectAllButton);
 		add(horizontalLayout);
@@ -98,15 +94,13 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 		final HorizontalLayout buttonsLayout = new HorizontalLayout();
 		final Button addTodoButton = new Button("New Todo");
 		addTodoButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_SUCCESS);
-		addTodoButton.addClickListener(event -> {
-			showAddTodoDialog();
-		});
+		addTodoButton.addClickListener(event -> showAddTodoDialog());
 		
 		final Button deleteButton = new Button("Delete");
 		deleteButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_ERROR);
 		deleteButton.addClickListener(event -> {
 			todoRepository.remove(grid.getSelectedItems());
-			Broadcaster.broadcast("items deleted by : " + user);
+			Broadcaster.broadcast("items were deleted by : " + user);
 		});
 		
 		buttonsLayout.add(addTodoButton, deleteButton);
@@ -132,13 +126,11 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 			todo.setDone(false);
 			todoRepository.addTodo(todo);
 			dialog.close();
-			Broadcaster.broadcast("new Items added by : " + user);
+			Broadcaster.broadcast("New items were added by : " + user);
 		});
 		
 		Button cancelButton = new Button("Cancel");
-		cancelButton.addClickListener(event -> {
-			dialog.close();
-		});
+		cancelButton.addClickListener(event -> dialog.close());
 		
 		dialog.getFooter().add(saveButton, cancelButton);
 		

@@ -16,12 +16,16 @@ import jakarta.annotation.PostConstruct;
 @Repository
 public class InMemoryTodoRepository implements TodoRepository {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private List<Todo> todos = new ArrayList<>();
+	private Random random = new Random();
 	
 	
 	@PostConstruct
 	public void init() {
-		Random random = new Random();
 		for (int i = 1; i <= 20; i++) {
 			Todo todo = new Todo();
 			todo.setCreationDate(LocalDateTime.now());
