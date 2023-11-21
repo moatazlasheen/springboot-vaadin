@@ -1,9 +1,11 @@
 package com.example.springbootvaadin.ui;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.example.springbootvaadin.excel.ExcelGenerationService;
 import com.example.springbootvaadin.model.Todo;
 import com.example.springbootvaadin.repo.TodoRepository;
 import com.example.springbootvaadin.serverpush.Broadcaster;
@@ -15,6 +17,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -26,6 +29,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.shared.Registration;
 
 @Route("todos/:user")
@@ -39,6 +43,9 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 
 	@Autowired
 	private TodoRepository todoRepository;
+	
+	@Autowired
+	private ExcelGenerationService excelGenerationService;
 	
 	private String user; 
 	
@@ -103,7 +110,18 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 			Broadcaster.broadcast("items were deleted by : " + user);
 		});
 		
-		buttonsLayout.add(addTodoButton, deleteButton);
+		Anchor exportXlsxAnchor = new Anchor(new StreamResource("todos.xlsx", () -> {
+			try {
+				return excelGenerationService.generateExcel(grid.getSelectedItems());
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}), null);
+		Button exportXlsxButton = new Button("Export To Excel");
+		exportXlsxButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
+		exportXlsxAnchor.add(exportXlsxButton);
+		
+		buttonsLayout.add(addTodoButton, deleteButton, exportXlsxAnchor);
 		add(buttonsLayout);
 	}
 
