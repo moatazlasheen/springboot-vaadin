@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.example.springbootvaadin.excel.ExcelGenerationService;
 import com.example.springbootvaadin.model.Todo;
+import com.example.springbootvaadin.pdf.PDFGenerationService;
 import com.example.springbootvaadin.repo.TodoRepository;
 import com.example.springbootvaadin.serverpush.Broadcaster;
 import com.vaadin.flow.component.AttachEvent;
@@ -46,6 +47,9 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 	
 	@Autowired
 	private ExcelGenerationService excelGenerationService;
+	
+	@Autowired
+	private PDFGenerationService pdfGenerationService;
 	
 	private String user; 
 	
@@ -121,7 +125,19 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 		exportXlsxButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
 		exportXlsxAnchor.add(exportXlsxButton);
 		
-		buttonsLayout.add(addTodoButton, deleteButton, exportXlsxAnchor);
+		Anchor exportPdfAnchor = new Anchor(new StreamResource("todos.pdf", () -> {
+			try {
+				return pdfGenerationService.generatePDF(grid.getSelectedItems());
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}), null);
+		exportPdfAnchor.setTarget("_blank");
+		Button exportPdfButton = new Button("Export To PDF");
+		exportPdfButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
+		exportPdfAnchor.add(exportPdfButton);
+		
+		buttonsLayout.add(addTodoButton, deleteButton, exportXlsxAnchor, exportPdfAnchor);
 		add(buttonsLayout);
 	}
 
