@@ -1,6 +1,7 @@
 package com.example.springbootvaadin.ui;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,6 +130,8 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 			try {
 				return pdfGenerationService.generatePDF(grid.getSelectedItems());
 			} catch (IOException e) {
+				throw new RuntimeException(e);
+			} catch (URISyntaxException e) {
 				throw new RuntimeException(e);
 			}
 		}), null);
