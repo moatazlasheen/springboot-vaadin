@@ -6,9 +6,10 @@ import java.net.URISyntaxException;
 import java.util.Set;
 
 import com.example.springbootvaadin.model.Todo;
+import com.itextpdf.text.DocumentException;
 
 public interface PDFGenerationService {
 
-	InputStream generatePDF(Set<Todo> selectedItems) throws IOException, URISyntaxException;
+	InputStream generatePDF(Set<Todo> selectedItems) throws IOException, URISyntaxException, DocumentException;
 
 }

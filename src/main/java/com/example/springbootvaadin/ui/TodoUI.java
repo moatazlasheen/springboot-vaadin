@@ -11,6 +11,7 @@ import com.example.springbootvaadin.model.Todo;
 import com.example.springbootvaadin.pdf.PDFGenerationService;
 import com.example.springbootvaadin.repo.TodoRepository;
 import com.example.springbootvaadin.serverpush.Broadcaster;
+import com.itextpdf.text.DocumentException;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
@@ -132,6 +133,8 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			} catch (URISyntaxException e) {
+				throw new RuntimeException(e);
+			} catch (DocumentException e) {
 				throw new RuntimeException(e);
 			}
 		}), null);
