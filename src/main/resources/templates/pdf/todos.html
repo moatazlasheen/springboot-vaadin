@@ -16,8 +16,8 @@
 			<tr th:each="item: ${todos}">
 				<td th:text="${item.name}"></td>
 				<td th:text="${item.creator}"></td>
-				<td><td th:text="${item.creationDate}"></td></td>
-				<td><td th:text="${item.done}"></td></td>
+				<td th:text="${item.creationDate}"></td>
+				<td th:text="${item.done}"></td>
 			</tr>
 		</table>
 		
