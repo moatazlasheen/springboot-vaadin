@@ -5,5 +5,6 @@ import java.net.URISyntaxException;
 
 public interface FileToBase64Converter {
 
-	String convertFileToBase64(String path) throws IOException, URISyntaxException;
+	String convertFileToBase64(String filePath) throws IOException, URISyntaxException;
+	String convertResourceToBase64(String resourcePath) throws IOException, URISyntaxException;
 }

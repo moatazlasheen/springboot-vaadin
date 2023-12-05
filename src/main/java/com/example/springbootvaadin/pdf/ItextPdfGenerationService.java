@@ -31,7 +31,7 @@ public class ItextPdfGenerationService implements PDFGenerationService {
 		Context context = new Context();
 		context.setVariable("title", "Todos : " + todos.size());
 		context.setVariable("todos", todos);
-		context.setVariable("image", "data:image/png;base64, " + fileToBase64Converter.convertFileToBase64("src/main/resources/templates/pdf/images/Mercedes-Logo.svg.png"));
+		context.setVariable("image", "data:image/png;base64, " + fileToBase64Converter.convertResourceToBase64("templates/pdf/images/Mercedes-Logo.svg.png"));
 		
 		String html = springTemplateEngine.process("pdf/todos.html", context);
 		
