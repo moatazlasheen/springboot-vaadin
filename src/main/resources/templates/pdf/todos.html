@@ -1,6 +1,23 @@
 <html xmlns:th="http://www.thymeleaf.org">
 	<head>
 		<title>Todos</title>
+		<style>
+			table {
+			  border-collapse: collapse;
+			  border-spacing: 0;
+			  width: 100%;
+			  border: 1px solid #ddd;
+			}
+
+			th, td {
+			  text-align: left;
+			  padding: 16px;
+			}
+			
+			tr:nth-child(even) {
+			  background-color: #f2f2f2;
+			}
+		</style>
 	</head>
 	<body>
 		<h2 th:text="${title}"></h2>
@@ -22,11 +39,11 @@
 		</table>
 		
 		<div style="margin: 100px;">
-		  <img style="width: 50px;" th:src="${image}" ></img>
+		  <img style="width: 100px;" th:src="${image}" ></img>
 		</div>
 		
 		<div style="margin: 100px;">
-		  <img style="width: 50px;" th:src="${barcode}" ></img>
+		  <img style="width: 200px;" th:src="${barcode}" ></img>
 		</div>
 	</body>
 </html>
