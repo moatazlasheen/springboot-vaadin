@@ -25,4 +25,9 @@ public class FileToBase64ConverterImpl implements FileToBase64Converter{
 		return Base64.getEncoder().encodeToString(fileBytes);
 	}
 
+	@Override
+	public String convertByteArayToBase64(byte[] bytes) {
+		return Base64.getEncoder().encodeToString(bytes);
+	}
+
 }

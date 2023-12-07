@@ -13,6 +13,7 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
+import com.example.springbootvaadin.barcode.BarCodeGenerationService;
 import com.example.springbootvaadin.converters.FileToBase64Converter;
 import com.example.springbootvaadin.model.Todo;
 import com.itextpdf.text.DocumentException;
@@ -26,12 +27,16 @@ public class ItextPdfGenerationService implements PDFGenerationService {
 	@Autowired
 	private FileToBase64Converter fileToBase64Converter;
 	
+	@Autowired
+	private BarCodeGenerationService barCodeGenerationService;
+	
 	@Override
 	public InputStream generatePDF(Set<Todo> todos) throws IOException, URISyntaxException, DocumentException {
 		Context context = new Context();
 		context.setVariable("title", "Todos : " + todos.size());
 		context.setVariable("todos", todos);
 		context.setVariable("image", "data:image/png;base64, " + fileToBase64Converter.convertResourceToBase64("templates/pdf/images/Mercedes-Logo.svg.png"));
+		context.setVariable("barcode", "data:image/png;base64, " + fileToBase64Converter.convertByteArayToBase64(barCodeGenerationService.generateBarCode("some text")));
 		
 		String html = springTemplateEngine.process("pdf/todos.html", context);
 		
