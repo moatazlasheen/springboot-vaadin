@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.example.springbootvaadin.excel.ExcelGenerationService;
 import com.example.springbootvaadin.model.Todo;
 import com.example.springbootvaadin.pdf.PDFGenerationService;
-import com.example.springbootvaadin.repo.TodoRepository;
 import com.example.springbootvaadin.serverpush.Broadcaster;
+import com.example.springbootvaadin.service.TodoService;
 import com.itextpdf.text.DocumentException;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -45,7 +45,7 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 	private static final long serialVersionUID = 1L;
 
 	@Autowired
-	private TodoRepository todoRepository;
+	private TodoService todoService;
 	
 	@Autowired
 	private ExcelGenerationService excelGenerationService;
@@ -85,7 +85,7 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 		final Button selectAllButton = new Button("Select All");
 		selectAllButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 		selectAllButton.setIcon(VaadinIcon.PLUS.create());
-		selectAllButton.addClickListener(event-> grid.asMultiSelect().select(todoRepository.getAllTodos()));
+		selectAllButton.addClickListener(event-> grid.asMultiSelect().select(todoService.findAll()));
 		
 		final Button deSelectAllButton = new Button("Deselect All");
 		deSelectAllButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
@@ -112,7 +112,7 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 		final Button deleteButton = new Button("Delete");
 		deleteButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_ERROR);
 		deleteButton.addClickListener(event -> {
-			todoRepository.remove(grid.getSelectedItems());
+			todoService.remove(grid.getSelectedItems());
 			Broadcaster.broadcast("items were deleted by : " + user);
 		});
 		
@@ -164,7 +164,7 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 			todo.setCreationDate(LocalDateTime.now());
 			todo.setCreator(user);
 			todo.setDone(false);
-			todoRepository.addTodo(todo);
+			todoService.addTodo(todo);
 			dialog.close();
 			Broadcaster.broadcast("New items were added by : " + user);
 		});
@@ -209,7 +209,7 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 
 
 	private void refreshTodos() {
-		grid.setItems(todoRepository.getAllTodos());
+		grid.setItems(todoService.findAll());
 	}
 
 

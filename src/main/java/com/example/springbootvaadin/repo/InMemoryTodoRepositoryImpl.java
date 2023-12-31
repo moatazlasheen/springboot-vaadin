@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import com.example.springbootvaadin.model.Todo;
@@ -14,7 +14,8 @@ import jakarta.annotation.PostConstruct;
 
 
 @Repository
-public class InMemoryTodoRepository implements TodoRepository {
+@Profile("inMemory")
+public class InMemoryTodoRepositoryImpl implements TodoRepository {
 	
 	/**
 	 * 
@@ -28,6 +29,7 @@ public class InMemoryTodoRepository implements TodoRepository {
 	public void init() {
 		for (int i = 1; i <= 20; i++) {
 			Todo todo = new Todo();
+			todo.setId(String.valueOf(i));
 			todo.setCreationDate(LocalDateTime.now());
 			todo.setCreator("admin");
 			if(random.nextBoolean()) {
@@ -39,20 +41,21 @@ public class InMemoryTodoRepository implements TodoRepository {
 	}
 
 	@Override
-	public List<Todo> getAllTodos() {
+	public List<Todo> findAll() {
 		return this.todos;
 	}
 
 	@Override
-	public void addTodo(Todo todo) {
-		this.todos.add(todo);
+	public void deleteAll(Iterable<? extends Todo> todos) {
+		for (Todo todo : todos) {
+			this.todos.remove(todo);
+		}
 	}
 
 	@Override
-	public void remove(Set<Todo> selectedItems) {
-		for (Todo todo : selectedItems) {
-			this.todos.remove(todo);
-		}
+	public Todo save(Todo todo) {
+		this.todos.add(todo);
+		return todo;
 	}
 
 }

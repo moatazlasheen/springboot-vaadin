@@ -5,18 +5,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import com.example.springbootvaadin.repo.TodoRepository;
+import com.example.springbootvaadin.service.TodoService;
 
 @SpringBootTest
 class SpringbootVaadinApplicationTests {
 	
 	@Autowired
-	private TodoRepository todoRepository;
+	private TodoService todoService;
 
 	@Test
 	void contextLoads() {
-		assertThat(todoRepository).isNotNull();
+		assertThat(todoService).isNotNull();
 	}
 
 }

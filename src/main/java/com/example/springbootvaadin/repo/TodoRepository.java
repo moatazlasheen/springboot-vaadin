@@ -1,17 +1,15 @@
 package com.example.springbootvaadin.repo;
 
-import java.io.Serializable;
 import java.util.List;
-import java.util.Set;
 
 import com.example.springbootvaadin.model.Todo;
 
-public interface TodoRepository extends Serializable {
+public interface TodoRepository {
 
-	List<Todo> getAllTodos();
+	List<Todo> findAll();
 
-	void addTodo(Todo todo);
+	void deleteAll(Iterable<? extends Todo> todos);
 
-	void remove(Set<Todo> selectedItems);
+	Todo save(Todo todo);
 
 }

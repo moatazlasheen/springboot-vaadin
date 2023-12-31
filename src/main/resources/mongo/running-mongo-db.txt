@@ -1,0 +1,13 @@
+Reference : https://hub.docker.com/_/mongo
+
+command to start docker compose :
+docker-compose -f stack.yml up  --detach
+
+stop the compose :
+docker-compose -f stack.yml stop
+
+mongo express url : 
+http://localhost:8081
+
+credentials :
+admin/pass
