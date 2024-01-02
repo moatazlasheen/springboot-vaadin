@@ -1,6 +1,7 @@
 package com.example.springbootvaadin.ui;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 
@@ -10,6 +11,7 @@ import com.example.springbootvaadin.excel.ExcelGenerationService;
 import com.example.springbootvaadin.model.Todo;
 import com.example.springbootvaadin.pdf.PDFGenerationService;
 import com.example.springbootvaadin.serverpush.Broadcaster;
+import com.example.springbootvaadin.service.AttachementService;
 import com.example.springbootvaadin.service.TodoService;
 import com.itextpdf.text.DocumentException;
 import com.vaadin.flow.component.AttachEvent;
@@ -21,6 +23,7 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -28,6 +31,8 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.HasDynamicTitle;
@@ -59,6 +64,11 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 	
 	private Registration broadcastRegisteration;
 	
+	@Autowired
+	private AttachementService attachementService;
+	
+	private Div filesDiv = new Div();
+	
 	
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
@@ -67,16 +77,62 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 		createTodoButtons();
 		createTodosGrid();
 		createGridItemsSelectionControls();
+		createFilesControls();
 		
 		final UI ui = attachEvent.getUI();
 		broadcastRegisteration = Broadcaster.register(message -> 
 			ui.access(() -> {
 				refreshTodos();
+				refreshFiles();
 				Notification.show(message);
 			})
 		);
 		
 		
+	}
+
+
+	private void refreshFiles() {
+		filesDiv.removeAll();
+		filesDiv.add(createFilesListLayout());
+	}
+
+
+	private void createFilesControls() {
+		// the upload component
+		Upload fileUpload = createUploadComponent();
+		
+		// files list component
+		
+		VerticalLayout filesList = createFilesListLayout();
+		filesDiv.add(filesList);
+		add(fileUpload, filesDiv);
+		
+	}
+
+
+	private VerticalLayout createFilesListLayout() {
+		final VerticalLayout fileList = new VerticalLayout();
+		attachementService.getAllFiles().stream().forEach(fileInfo -> {
+			Anchor anchor = new Anchor(new StreamResource(fileInfo.getFileName(), () -> {
+				try {
+					return attachementService.getFileAsResource(fileInfo.getObjectId());
+				} catch (IllegalStateException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return null;
+			}), null);
+			anchor.setTarget("_blank");
+			Button downloadButton = new Button(fileInfo.getFileName(), new Icon(VaadinIcon.DOWNLOAD_ALT));
+			downloadButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+			downloadButton.getStyle().set("cursor", "pointer");
+			anchor.add(downloadButton);
+			fileList.add(anchor);
+		});
+		
+		return fileList;
 	}
 
 
@@ -145,6 +201,21 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 		
 		buttonsLayout.add(addTodoButton, deleteButton, exportXlsxAnchor, exportPdfAnchor);
 		add(buttonsLayout);
+		
+	}
+
+
+	private Upload createUploadComponent() {
+		MemoryBuffer memoryBuffer = new MemoryBuffer();
+		Upload fileUpload = new Upload(memoryBuffer);
+		fileUpload.addFinishedListener(event -> {
+			final String fileName = event.getFileName();
+			final InputStream is = memoryBuffer.getInputStream();
+			attachementService.saveFile(fileName, is);
+			Broadcaster.broadcast("New file has been uploaded");
+		});
+		
+		return fileUpload;
 	}
 
 
