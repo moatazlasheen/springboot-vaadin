@@ -73,12 +73,18 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
 		super.onAttach(attachEvent);
+		// application name
 		createApplicationHeader();
+		// create, delete and export (xls and pdf)
 		createTodoButtons();
+		// data table
 		createTodosGrid();
+		// select all and deselect all
 		createGridItemsSelectionControls();
+		// upload, list attachments
 		createFilesControls();
 		
+		// handle server pushes
 		final UI ui = attachEvent.getUI();
 		broadcastRegisteration = Broadcaster.register(message -> 
 			ui.access(() -> {
@@ -103,7 +109,6 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 		Upload fileUpload = createUploadComponent();
 		
 		// files list component
-		
 		VerticalLayout filesList = createFilesListLayout();
 		filesDiv.add(filesList);
 		add(fileUpload, filesDiv);
@@ -129,7 +134,14 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 			downloadButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
 			downloadButton.getStyle().set("cursor", "pointer");
 			anchor.add(downloadButton);
-			fileList.add(anchor);
+			Button deleteBtn = new Button(null, new Icon(VaadinIcon.FILE_REMOVE));
+			deleteBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+			deleteBtn.getStyle().set("cursor", "pointer");
+			deleteBtn.addClickListener( event -> {
+				attachementService.deleteFile(fileInfo.getObjectId());
+				Broadcaster.broadcast("file " + fileInfo.getFileName() + " as deleted by " + user);
+			});
+			fileList.add(new HorizontalLayout(anchor, deleteBtn));
 		});
 		
 		return fileList;
@@ -211,8 +223,8 @@ public class TodoUI extends VerticalLayout implements BeforeEnterObserver, HasDy
 		fileUpload.addFinishedListener(event -> {
 			final String fileName = event.getFileName();
 			final InputStream is = memoryBuffer.getInputStream();
-			attachementService.saveFile(fileName, is);
-			Broadcaster.broadcast("New file has been uploaded");
+			attachementService.saveFile(fileName, is, event.getContentLength());
+			Broadcaster.broadcast("New file " + fileName + " has been uploaded by " + user);
 		});
 		
 		return fileUpload;

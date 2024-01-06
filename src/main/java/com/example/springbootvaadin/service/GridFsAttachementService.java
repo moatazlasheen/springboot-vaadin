@@ -2,10 +2,12 @@ package com.example.springbootvaadin.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -23,8 +25,13 @@ public class GridFsAttachementService implements AttachementService {
 	private GridFsOperations gridFsOperations;
 	
 	@Override
-	public void saveFile(String fileName, InputStream is) {
-		gridFsOperations.store(is, fileName);
+	public void saveFile(String fileName, InputStream is, long length) {
+		Document metaData = new Document();
+		metaData.append("name", fileName);
+		metaData.put("size", length);
+		metaData.put("mime", URLConnection.guessContentTypeFromName(fileName));
+		
+		gridFsOperations.store(is, fileName, metaData);
 	}
 
 	@Override
@@ -41,6 +48,11 @@ public class GridFsAttachementService implements AttachementService {
 	public InputStream getFileAsResource(String objectId) throws IllegalStateException, IOException {
 		final GridFSFile gridFSFile = gridFsOperations.findOne(new Query(Criteria.where("_id").is(new ObjectId(objectId))));
 		return gridFsOperations.getResource(gridFSFile).getInputStream();
+	}
+
+	@Override
+	public void deleteFile(String objectId) {
+		gridFsOperations.delete(new Query(Criteria.where("_id").is(new ObjectId(objectId))));
 	}
 
 }
